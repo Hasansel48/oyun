@@ -6,12 +6,13 @@ BOT_TOKEN = "7781380072:AAHH_4PWe1Nuau3j5fQ49ufLwDNalm66xS8"
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("✅ /start komutu geldi!")
 
+    # Oyun butonu için callback_game boş dict olmalı!
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="🎮 NumberGo", callback_game={})]
     ])
 
     await update.message.reply_text(
-        "🧩 NumberGo oyununa hoş geldin!\nAşağıdaki butona tıklayarak oyunu başlat.",
+        "🧩 NumberGo oyununa hoş geldin!\nButona tıklayarak oyunu başlat.",
         reply_markup=keyboard
     )
 
