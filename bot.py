@@ -2,8 +2,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 
-BOT_TOKEN = os.getenv("7781380072:AAHH_4PWe1Nuau3j5fQ49ufLwDNalm66xS8
-")  # Railway'de tanımlanacak
+BOT_TOKEN = os.getenv("7781380072:AAHH_4PWe1Nuau3j5fQ49ufLwDNalm66xS8")  # Railway'de tanımlanacak
 
 # /start komutu → kullanıcıya oyun butonu gönder
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
