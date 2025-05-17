@@ -15,6 +15,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🧩 NumberGo oyununa hoş geldin!\nButona tıklayarak oyunu başlat.",
         reply_markup=keyboard
     )
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🆘 Yardım komutu çalıştı.")
+
+app.add_handler(CommandHandler("help", help_command))
+
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
