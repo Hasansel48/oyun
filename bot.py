@@ -23,6 +23,13 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📋 Yardım:\n\n/start → Oyunu başlat\n/help → Yardım mesajı görüntüle"
     )
+from telegram.ext import MessageHandler, filters
+
+async def echo_all(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("🟡 Mesaj geldi:", update.message.text)
+
+app.add_handler(MessageHandler(filters.ALL, echo_all))
+
 
 # Uygulamayı başlat
 app = ApplicationBuilder().token(BOT_TOKEN).build()
