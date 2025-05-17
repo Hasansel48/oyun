@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10x10 Number Grid Game with Drawing Feature</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            margin: 20px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            grid-template-rows: repeat(10, 50px);
+            gap: 2px;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ccc;
+            background-color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cell.active {
+            background-color: #90ee90;
+            cursor: pointer;
+        }
+
+        .cell.filled {
+            background-color: #87cefa;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #reset {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #drawingArea {
+            margin-top: 20px;
+            border: 2px solid #ccc;
+            background-color: white;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <h1>10x10 Number Grid Game</h1>
+    <div class="grid" id="grid"></div>
+    <div id="status">Start by clicking on any cell to place 1.</div>
+    <button id="reset">Reset Game</button>
+
+    <!-- Drawing Canvas Area -->
+    <canvas id="drawingArea" width="500" height="500"></canvas>
+
+    <script>
+        const gridElement = document.getElementById('grid');
+        const statusElement = document.getElementById('status');
+        const resetButton = document.getElementById('reset');
+        const gridSize = 10;
+        let currentNumber = 1;
+        let lastPosition = null;
+
+        // Initialize grid
+        const grid = [];
+        for (let row = 0; row < gridSize; row++) {
+            grid[row] = [];
+            for (let col = 0; col < gridSize; col++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                grid[row][col] = cell;
+                gridElement.appendChild(cell);
+
+                // Add click event listener to cells
+                cell.addEventListener('click', () => handleCellClick(row, col));
+            }
+        }
+
+        function handleCellClick(row, col) {
+            const cell = grid[row][col];
+
+            // If it's the first move or a valid next move
+            if (currentNumber === 1 || cell.classList.contains('active')) {
+                cell.textContent = currentNumber;
+                cell.classList.add('filled');
+                cell.classList.remove('active');
+
+                // Highlight next valid moves
+                highlightValidMoves(row, col);
+
+                lastPosition = { row, col };
+                currentNumber++;
+
+                // Check if there are no valid moves left
+                if (!hasValidMoves()) {
+                    statusElement.textContent = `Game over! You reached ${currentNumber - 1}.`;
+                    disableAllCells();
+                } else {
+                    statusElement.textContent = `Placed ${currentNumber - 1}. Choose the next position.`;
+                }
+            }
+        }
+
+        function highlightValidMoves(row, col) {
+            // Clear previous highlights
+            clearHighlights();
+
+            // Define valid move offsets
+            const offsets = [
+                { r: 0, c: 3 }, { r: 0, c: -3 }, // Horizontal
+                { r: 3, c: 0 }, { r: -3, c: 0 }, // Vertical
+                { r: 2, c: 2 }, { r: 2, c: -2 }, // Diagonal
+                { r: -2, c: 2 }, { r: -2, c: -2 }
+            ];
+
+            offsets.forEach(offset => {
+                const newRow = row + offset.r;
+                const newCol = col + offset.c;
+                if (isInBounds(newRow, newCol) && !grid[newRow][newCol].classList.contains('filled')) {
+                    grid[newRow][newCol].classList.add('active');
+                }
+            });
+        }
+
+        function clearHighlights() {
+            grid.flat().forEach(cell => cell.classList.remove('active'));
+        }
+
+        function isInBounds(row, col) {
+            return row >= 0 && row < gridSize && col >= 0 && col < gridSize;
+        }
+
+        function hasValidMoves() {
+            return grid.flat().some(cell => cell.classList.contains('active'));
+        }
+
+        function disableAllCells() {
+            grid.flat().forEach(cell => cell.classList.remove('active'));
+        }
+
+        // Drawing functionality
+        const canvas = document.getElementById('drawingArea');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        function startDrawing(event) {
+            drawing = true;
+            draw(event); // Start drawing immediately
+        }
+
+        function draw(event) {
+            if (!drawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath(); // Reset path
+        }
+
+        resetButton.addEventListener('click', () => {
+            // Reset the game
+            grid.flat().forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('filled', 'active');
+            });
+            currentNumber = 1;
+            lastPosition = null;
+            statusElement.textContent = 'Start by clicking on any cell to place 1.';
+
+            // Reset drawing area
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    </script>
+</body>
+</html>
